@@ -12,7 +12,7 @@ import java.util.stream.IntStream;
 public class OffersRepository {
     public List<Offer> getOffers(String userId) {
         Random random = new Random();
-        return IntStream.range(random.nextInt(5), random.nextInt(20) + 5)
+        return IntStream.range(1, random.nextInt(20) + 5)
                 .mapToObj(operand -> Offer.builder()
                         .monthlyPayment(BigDecimal.valueOf(random.nextInt(60000) + 40000))
                         .rate(BigDecimal.valueOf(random.nextFloat() * 2 + 9))
