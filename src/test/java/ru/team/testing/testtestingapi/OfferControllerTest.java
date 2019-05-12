@@ -4,30 +4,26 @@ import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.junit4.DisplayName;
-import org.hamcrest.collection.IsCollectionWithSize;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
-import javax.servlet.http.Cookie;
 import java.util.Arrays;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest
+@WebFluxTest
 @RunWith(SpringRunner.class)
 @Epic("Получение решения от банков")
 public class OfferControllerTest {
-    @Autowired MockMvc          mockMvc;
+    @Autowired WebTestClient    webTestClient;
     @MockBean  OffersRepository offersRepository;
 
     @Test
@@ -35,11 +31,12 @@ public class OfferControllerTest {
     @Feature("Обновление информациии о решении")
     @DisplayName("IN_PROGRESS пока банки обрабатывают запрос")
     public void should_return_status() throws Exception {
-        mockMvc.perform(get("/offers"))
-                .andExpect(
-                        status().isOk()
-                )
-                .andExpect(jsonPath("$.status", equalTo("IN_PROGRESS")));
+        webTestClient.get()
+                .uri("/offers")
+                .exchange()
+                .expectStatus().is2xxSuccessful()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo("IN_PROGRESS");
     }
 
     @Test
@@ -53,12 +50,14 @@ public class OfferControllerTest {
                 new Offer()
         ));
 
-        mockMvc.perform(get("/offers").cookie(new Cookie("userId", "пятачок")))
-                .andExpect(
-                        status().isOk()
-                )
-                .andExpect(jsonPath("$.status", equalTo("SUCCESS")))
-                .andExpect(jsonPath("$.offers", IsCollectionWithSize.hasSize(2)));
+        webTestClient.get()
+                .uri("/offers")
+                .cookie("userId", "пятачок")
+                .exchange()
+                .expectStatus().is2xxSuccessful()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo("SUCCESS")
+                .jsonPath("$.offers").value(hasSize(2));
     }
 
     @Test
@@ -66,9 +65,9 @@ public class OfferControllerTest {
     @DisplayName("Метим пользователя если он анонимный")
     public void should_set_user_id_in_cookie() throws Exception {
 
-        mockMvc.perform(get("/offers"))
-                .andExpect(
-                        cookie().value("userId", notNullValue())
-                );
+        webTestClient.get()
+                .uri("/offers")
+                .exchange()
+                .expectHeader().value("set-cookie", containsString("userId="));
     }
 }
