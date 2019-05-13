@@ -20,6 +20,5 @@ public class OffersRepository {
                         .build()
                 )
                 .collect(Collectors.toList());
-
     }
 }
