@@ -1,6 +1,5 @@
 plugins {
 	id 'org.springframework.boot' version '2.1.4.RELEASE'
-	id 'io.qameta.allure' version '2.7.0'
 	id 'java'
 	id 'jacoco'
 }
@@ -10,19 +9,6 @@ apply plugin: 'io.spring.dependency-management'
 group = 'ru.team.testing'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
-
-ext {
-	allureVersion = '2.10.0'
-}
-
-allure {
-	version = allureVersion
-	autoconfigure = true
-
-	useJUnit4 {
-		version = allureVersion
-	}
-}
 
 repositories {
 	mavenCentral()
